@@ -2,84 +2,145 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOTILER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Защита от кэширования, чтобы код обновлялся у всех сразу -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>TOTILER: Final Sync</title>
     <style>
-        body { background: #000; color: #fff; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        /* Рамка TOT */
-        .frame { border: 2px solid #0f0; box-shadow: 0 0 15px #0f0; width: 85vw; height: 70vh; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
-        .logo { position: absolute; top: 10px; color: #0f0; font-weight: bold; font-size: 1.5rem; letter-spacing: 5px; }
-        #message { font-size: 2rem; text-align: center; padding: 20px; text-transform: uppercase; }
-        .timer { position: absolute; bottom: 20px; color: #444; font-size: 0.8rem; }
-        .dots { position: absolute; bottom: 45px; display: flex; gap: 10px; }
-        .dot { width: 8px; height: 8px; background: #222; border-radius: 50%; }
-        .dot.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
+        body { background: #f4f4f4; font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; user-select: none; -webkit-user-select: none; }
+        .frame { background: radial-gradient(circle, #FAF6E1 0%, #F5F0D5 100%); border: 3px solid #E4D96F; display: flex; flex-direction: column; align-items: center; padding: 10px 14px; border-radius: 26px; box-shadow: inset 0 0 15px rgba(228, 217, 111, 0.2), 0 8px 20px rgba(0,0,0,0.06); position: relative; overflow: hidden; width: 95%; max-width: 360px; box-sizing: border-box; min-height: 160px; }
+        .watermark { position: absolute; font-size: 8rem; font-weight: 900; color: #E4D96F; opacity: 0.12; z-index: 0; top: 50%; left: 50%; transform: translate(-50%, -50%) perspective(400px) rotateX(20deg) rotateY(-10deg); letter-spacing: 15px; pointer-events: none; white-space: nowrap; }
+        .network-info { position: absolute; top: 8px; width: 88%; display: flex; justify-content: space-between; font-size: 0.55rem; color: rgba(100, 90, 80, 0.4); font-weight: bold; z-index: 3; text-transform: uppercase; }
+        .time-row { display: flex; width: 100%; justify-content: space-between; align-items: center; z-index: 2; height: 2.8rem; }
+        .current-date { color: rgba(100, 90, 80, 0.25); font-size: 2.5rem; font-weight: 900; letter-spacing: -3px; line-height: 1; }
+        .current-time { color: rgba(90, 85, 80, 0.5); font-size: 2.5rem; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+        #message { font-size: 0.75rem; color: rgba(0, 0, 0, 0.6); font-weight: 600; width: 100%; text-align: center; text-transform: uppercase; margin: 12px 0 16px 0; z-index: 2; height: 1rem; transition: opacity 0.5s; unicode-bidi: plaintext; }
+        
+        .lang-selector { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #FAF6E1; z-index: 20; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; gap: 8px; }
+        .lang-btn { padding: 6px 12px; border: 1px solid #E4D96F; border-radius: 12px; font-size: 0.65rem; color: #666; font-weight: bold; background: white; }
+
+        .dots { display: flex; justify-content: space-between; width: 100%; gap: 6px; z-index: 2; }
+        .dot { flex-grow: 1; height: 4px; background: rgba(0, 0, 0, 0.04); border-radius: 2px; }
+        .dot.active { background: #E4D96F; }
+
+        .read-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #FAF6E1; z-index: 30; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 22px; }
+        .read-overlay.active { transform: translateY(0); }
+        input[type="text"] { width: 90%; background: none; border: none; border-bottom: 2px solid #E4D96F; color: #555; text-align: center; font-size: 1rem; padding: 10px; outline: none; margin-bottom: 20px; }
+        .btn-send { padding: 10px 25px; background: #E4D96F; border: none; border-radius: 15px; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+        .close-btn { margin-top: 20px; font-size: 0.6rem; color: #888; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="frame">
-        <div class="logo">TOT</div>
-        <div id="message">Привет</div>
-        <div class="dots" id="dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="frame" id="mainWidget">
+        <div id="lang-overlay" class="lang-selector" style="display:none;">
+            <div class="lang-btn" onclick="setLanguage('RU')">RU</div>
+            <div class="lang-btn" onclick="setLanguage('EN')">EN</div>
+            <div class="lang-btn" onclick="setLanguage('ZH')">ZH</div>
+            <div class="lang-btn" onclick="setLanguage('ES')">ES</div>
+            <div class="lang-btn" onclick="setLanguage('AR')">AR</div>
+            <div class="lang-btn" onclick="setLanguage('TR')">TR</div>
+            <div class="lang-btn" onclick="setLanguage('FA')">FA</div>
         </div>
-        <div class="timer" id="timer">До сброса: --:--</div>
+
+        <div class="network-info">
+            <span id="lib-status">Pulse: Standby</span>
+            <span id="wallet-balance">2,800,000 TOT</span>
+        </div>
+        <div class="watermark">TOT</div>
+        <div class="time-row">
+            <div class="current-date" id="device-date">00.00.00</div>
+            <div class="current-time" id="device-time">00:00</div>
+        </div>
+        <div id="message">Синхронизация...</div>
+        <div class="dots" id="dots"></div>
+
+        <div class="read-overlay" id="overlay">
+            <input type="text" id="user-input" placeholder="Ваш ответ...">
+            <button class="btn-send" onclick="sendMessage()">Отправить</button>
+            <div class="close-btn" onclick="toggleOverlay(false)">Закрыть</div>
+        </div>
     </div>
 
 <script>
-    // Тестовый словарь
-    const words = ["Мир", "Идея", "Жди", "Да", "Нет", "TOT", "Важно", "Пора", "Город", "Связь"];
+    const dictionary = ["СВЯЗЬ", "ПОТОК", "ПОМОЩЬ", "ЗДЕСЬ", "ВИЖУ", "ЖДУ", "ИДУ", "ВРЕМЯ", "МИР", "ОБЪЕКТ"];
     
-    let missedCount = 0;
-    let lastCycle = -1;
+    let state = {
+        lang: localStorage.getItem('tot_lang'),
+        lastMinute: -1,
+        balance: 2800000
+    };
+
+    let pressTimer;
+    const widget = document.getElementById('mainWidget');
+    const overlay = document.getElementById('overlay');
+
+    widget.addEventListener('touchstart', (e) => {
+        if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+            pressTimer = setTimeout(() => toggleOverlay(true), 700);
+        }
+    });
+    widget.addEventListener('touchend', () => clearTimeout(pressTimer));
+
+    function toggleOverlay(show) {
+        if (show) overlay.classList.add('active');
+        else overlay.classList.remove('active');
+    }
+
+    function setLanguage(l) {
+        state.lang = l;
+        localStorage.setItem('tot_lang', l);
+        document.getElementById('lang-overlay').style.display = 'none';
+        document.getElementById('lib-status').innerText = "Identity: " + l;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        if (input.value.trim() !== "") {
+            document.getElementById('message').innerText = input.value.toUpperCase();
+            input.value = "";
+            toggleOverlay(false);
+        }
+    }
 
     function updateApp() {
+        if (!state.lang) {
+            document.getElementById('lang-overlay').style.display = 'flex';
+            return;
+        }
+
         const now = new Date();
-        const hour = now.getHours();
-        const min = now.getMinutes();
-        const sec = now.getSeconds();
+        const h = now.getHours();
+        const m = now.getMinutes();
+        const totalMs = Date.now();
 
-        // 1. Логика 4-часового цикла (0, 4, 8, 12, 16, 20)
-        const currentCycle = Math.floor(hour / 4);
+        document.getElementById('device-date').innerText = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear().toString().slice(-2)}`;
+        document.getElementById('device-time').innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 
-        // 2. Проверка сброса цикла
-        if (lastCycle !== -1 && currentCycle !== lastCycle) {
-            // Если цикл сменился, а ответа не было (имитация)
-            missedCount++;
-            document.getElementById('message').innerText = `Привет (${missedCount})`;
-            renderDots();
+        if (m !== state.lastMinute) {
+            const msgEl = document.getElementById('message');
+            
+            if (m === 0 && (h === 0 || h === 12)) {
+                msgEl.innerText = h === 0 ? "ПОСЛАНИЕ: НОЧЬ" : "ПОСЛАНИЕ: ДЕНЬ";
+            } else {
+                const cycleMin = Math.floor((totalMs / 60000) % 360);
+                const wordIdx = cycleMin % dictionary.length;
+                msgEl.style.opacity = 0;
+                setTimeout(() => {
+                    msgEl.innerText = dictionary[wordIdx];
+                    msgEl.style.opacity = 0.8;
+                }, 400);
+            }
+            state.lastMinute = m;
         }
-        lastCycle = currentCycle;
-
-        // 3. Авто-проверка "сообщений" (Имитация получения данных)
-        // Допустим, отправитель "заложил" слово на 10-й минуте часа
-        if (min === 10 && sec < 2) {
-            let wordIndex = (currentCycle + 2) % words.length; // Наша формула кодировки
-            document.getElementById('message').innerText = words[wordIndex];
-        }
-
-        // 4. Таймер до конца цикла
-        const nextCycleHour = (currentCycle + 1) * 4;
-        let hRem = nextCycleHour - hour - 1;
-        let mRem = 59 - min;
-        let sRem = 59 - sec;
-        document.getElementById('timer').innerText = `СБРОС ЧЕРЕЗ: ${hRem}ч ${mRem}м ${sRem}с`;
+        renderDots(Math.floor(((totalMs / 60000) % 360) / 90));
     }
 
-    function renderDots() {
+    function renderDots(activeIdx) {
         const dotsContainer = document.getElementById('dots');
         dotsContainer.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            let dot = document.createElement('div');
-            dot.className = 'dot' + (i < missedCount ? ' active' : '');
-            dotsContainer.appendChild(dot);
-        }
-    }
-
-    // Запуск авто-проверки каждую секунду
-    setInterval(updateApp, 1000);
-    updateApp();
-</script>
+        for (let i = 0; i 
 </body>
 </html>
