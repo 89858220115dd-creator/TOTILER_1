@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTILER</title>
+    <style>
+        body { background: #000; color: #fff; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        /* Рамка TOT */
+        .frame { border: 2px solid #0f0; box-shadow: 0 0 15px #0f0; width: 85vw; height: 70vh; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
+        .logo { position: absolute; top: 10px; color: #0f0; font-weight: bold; font-size: 1.5rem; letter-spacing: 5px; }
+        #message { font-size: 2rem; text-align: center; padding: 20px; text-transform: uppercase; }
+        .timer { position: absolute; bottom: 20px; color: #444; font-size: 0.8rem; }
+        .dots { position: absolute; bottom: 45px; display: flex; gap: 10px; }
+        .dot { width: 8px; height: 8px; background: #222; border-radius: 50%; }
+        .dot.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
+    </style>
+</head>
+<body>
+
+    <div class="frame">
+        <div class="logo">TOT</div>
+        <div id="message">Привет</div>
+        <div class="dots" id="dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <div class="timer" id="timer">До сброса: --:--</div>
+    </div>
+
+<script>
+    // Тестовый словарь
+    const words = ["Мир", "Идея", "Жди", "Да", "Нет", "TOT", "Важно", "Пора", "Город", "Связь"];
+    
+    let missedCount = 0;
+    let lastCycle = -1;
+
+    function updateApp() {
+        const now = new Date();
+        const hour = now.getHours();
+        const min = now.getMinutes();
+        const sec = now.getSeconds();
+
+        // 1. Логика 4-часового цикла (0, 4, 8, 12, 16, 20)
+        const currentCycle = Math.floor(hour / 4);
+
+        // 2. Проверка сброса цикла
+        if (lastCycle !== -1 && currentCycle !== lastCycle) {
+            // Если цикл сменился, а ответа не было (имитация)
+            missedCount++;
+            document.getElementById('message').innerText = `Привет (${missedCount})`;
+            renderDots();
+        }
+        lastCycle = currentCycle;
+
+        // 3. Авто-проверка "сообщений" (Имитация получения данных)
+        // Допустим, отправитель "заложил" слово на 10-й минуте часа
+        if (min === 10 && sec < 2) {
+            let wordIndex = (currentCycle + 2) % words.length; // Наша формула кодировки
+            document.getElementById('message').innerText = words[wordIndex];
+        }
+
+        // 4. Таймер до конца цикла
+        const nextCycleHour = (currentCycle + 1) * 4;
+        let hRem = nextCycleHour - hour - 1;
+        let mRem = 59 - min;
+        let sRem = 59 - sec;
+        document.getElementById('timer').innerText = `СБРОС ЧЕРЕЗ: ${hRem}ч ${mRem}м ${sRem}с`;
+    }
+
+    function renderDots() {
+        const dotsContainer = document.getElementById('dots');
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            let dot = document.createElement('div');
+            dot.className = 'dot' + (i < missedCount ? ' active' : '');
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    // Запуск авто-проверки каждую секунду
+    setInterval(updateApp, 1000);
+    updateApp();
+</script>
+</body>
+</html>
