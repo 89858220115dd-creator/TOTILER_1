@@ -3,191 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Настройки для запуска как приложение -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#FAF6E1">
-    
-    <title>TOTILER Pager Edition v2</title>
+    <title>PAGER LIVE</title>
     <style>
-        body { background: #f4f4f4; font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; user-select: none; -webkit-user-select: none; overflow: hidden; }
-        
-        .frame { 
-            background: radial-gradient(circle, #FAF6E1 0%, #F5F0D5 100%);
-            border: 3px solid #E4D96F; 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 15px 20px; 
-            border-radius: 26px; 
-            box-shadow: inset 0 0 15px rgba(228, 217, 111, 0.2), 0 8px 20px rgba(0,0,0,0.06);
-            position: relative;
-            width: 95%; max-width: 360px; box-sizing: border-box;
-        }
-
-        .globe-icon { 
-            position: absolute; top: 12px; left: 12px; 
-            font-size: 1.3rem; color: #87CEEB; z-index: 20; cursor: pointer; 
-        }
-
-        .lang-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #FAF6E1; border-radius: 22px; z-index: 30;
-            display: none; flex-direction: column; padding: 15px; box-sizing: border-box;
-        }
-        .lang-overlay.active { display: flex; }
-
-        .lang-search {
-            width: 100%; border: 1px solid #E4D96F; border-radius: 8px;
-            padding: 8px; font-size: 0.9rem; outline: none; margin-bottom: 10px;
-            background: #fff; box-sizing: border-box;
-        }
-
-        .lang-list { 
-            flex-grow: 1; overflow-y: auto; width: 100%; 
-            border: 1px solid rgba(228, 217, 111, 0.3); border-radius: 8px;
-        }
-        .lang-item { 
-            padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; 
-            text-align: left; cursor: pointer; color: #555;
-        }
-        .lang-item:hover { background: #fff; }
-
-        .watermark { position: absolute; font-size: 8rem; font-weight: 900; color: #E4D96F; opacity: 0.15; z-index: 0; top: 50%; left: 50%; transform: translate(-50%, -50%) perspective(400px) rotateX(20deg) rotateY(-10deg); letter-spacing: 15px; pointer-events: none; white-space: nowrap; }
-
-        .time-row { 
-            display: flex; width: 100%; justify-content: space-between; 
-            align-items: center; z-index: 2; height: 3rem;
-            margin-top: 5px;
-        }
-        .current-date { color: rgba(102, 102, 102, 0.3); font-size: 2.3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-        .current-time { color: #666; font-size: 2.3rem; font-weight: 900; line-height: 1; letter-spacing: -1px; }
-
-        #message { font-size: 0.75rem; color: #000; font-weight: 600; width: 100%; text-align: justify; text-align-last: justify; text-transform: uppercase; letter-spacing: 3px; margin: 15px 0; z-index: 2; opacity: 0.8; cursor: pointer; min-height: 1rem; }
-
-        .dots { display: flex; justify-content: space-between; width: 100%; gap: 6px; z-index: 2; margin-bottom: 5px; }
-        .dot { flex-grow: 1; height: 4px; background: rgba(0, 0, 0, 0.05); border-radius: 2px; }
-        .dot.active { background: #E4D96F; }
-
-        .pager-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #FAF6E1; z-index: 40; display: none; flex-direction: column;
-            justify-content: center; align-items: center; padding: 20px;
-            box-sizing: border-box; border-radius: 22px;
-        }
-        .pager-overlay.active { display: flex; }
-
-        #edit-text { 
-            width: 100%; height: 140px; border: 2px solid #E4D96F; 
-            border-radius: 12px; padding: 12px; font-size: 16px; 
-            outline: none; resize: none; margin-bottom: 15px; background: #fff;
-        }
-        .btn { padding: 10px 20px; background: #E4D96F; border-radius: 10px; font-weight: bold; color: #fff; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; border: none; }
+        :root { --bg: #FAF6E1; --accent: #E4D96F; }
+        body { background: #eee; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .frame { background: var(--bg); border: 4px solid var(--accent); width: 85%; max-width: 340px; padding: 25px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; }
+        .time-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 900; color: rgba(0, 0, 0, 0.2); font-size: 1.1rem; }
+        #display { min-height: 120px; font-weight: 700; text-transform: uppercase; cursor: pointer; color: #333; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; text-align: center; overflow-wrap: anywhere; line-height: 1.2; }
+        .overlay { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; padding: 20px; }
+        .overlay.active { display: flex; }
+        #input { flex: 1; border: 3px solid var(--accent); border-radius: 15px; padding: 15px; font-size: 1.2rem; outline: none; resize: none; background: #fff; }
+        .btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { flex: 1; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .hint { font-size: 0.7rem; color: #aaa; text-align: center; margin-top: 10px; text-transform: uppercase; }
+        #log { font-size: 10px; color: red; margin-top: 5px; height: 15px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-    <div class="frame">
-        <div class="globe-icon" id="globeBtn">🌐</div>
-        <div class="watermark">TOT</div>
-        
-        <div class="time-row">
-            <div class="current-date" id="device-date">00.00.00</div>
-            <div class="current-time" id="device-time">00:00</div>
-        </div>
+<div class="frame">
+    <div class="time-row"><div id="date">00.00.00</div><div id="time">00:00</div></div>
+    <div id="display">СВЯЗЬ...</div>
+    <div id="log"></div>
+    <div class="hint">Тап — Обновить / Зажать — Писать</div>
+</div>
 
-        <div id="message">НАЖМИТЕ ДЛЯ СВЯЗИ...</div>
-        <div class="dots" id="dots"></div>
-
-        <div class="lang-overlay" id="langOverlay">
-            <div style="font-size:0.6rem; color:#B5A93F; margin-bottom:5px; font-weight:bold;">SELECT LANGUAGE</div>
-            <input type="text" class="lang-search" id="langSearch" placeholder="Поиск языка...">
-            <div class="lang-list" id="langList"></div>
-            <div class="btn" id="closeLang" style="margin-top:10px; width:100%; text-align:center; box-sizing:border-box;">ЗАКРЫТЬ</div>
-        </div>
-
-        <div class="pager-overlay" id="textOverlay">
-            <div style="font-size: 0.6rem; color: #B5A93F; margin-bottom: 10px; font-weight: bold;">PAGER INPUT</div>
-            <textarea id="edit-text" maxlength="300" placeholder="ВВЕДИТЕ ТЕКСТ..."></textarea>
-            <div style="display:flex; gap:10px;">
-                <div class="btn" id="sendBtn">ОТПРАВИТЬ</div>
-                <div class="btn" id="cancelBtn" style="background:#ccc">ОТМЕНА</div>
-            </div>
-        </div>
+<div class="overlay" id="overlay">
+    <textarea id="input" placeholder="СООБЩЕНИЕ..."></textarea>
+    <div class="btns">
+        <button class="btn" style="background:#ddd" onclick="toggle()">НАЗАД</button>
+        <button class="btn" style="background:var(--accent);color:#000" onclick="send()">В ЭФИР</button>
     </div>
+</div>
 
 <script>
-    const languages = ["Русский", "English", "中文", "Español", "العربية", "हिन्दी", "Français", "Deutsch", "日本語", "Türkçe"];
-    const baseWords = ["МИР", "СВЯЗЬ", "ПОТОК", "ВРЕМЯ", "ЖДИ", "ИДУ", "СВОБОДА", "ПУЛЬС", "ГОРОД", "ВАЖНО"];
-    
-    let currentLang = localStorage.getItem('tot_lang') || "Русский";
-    let customMsg = localStorage.getItem('tot_msg') || "";
-    let lastMinute = -1;
+    const PROJECT_URL = "https://supabase.co"; 
+    const KEY = "sb_publishable_DArGTwAvQs-vJlD9sxxv8A_ZBZ38TbH";
+    const BASE_URL = `${PROJECT_URL}/rest/v1/messages`;
 
-    function updateApp() {
-        const now = new Date();
-        const h = now.getHours(), m = now.getMinutes();
-        document.getElementById('device-date').innerText = `${now.getDate().toString().padStart(2,'0')}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getFullYear().toString().slice(-2)}`;
-        document.getElementById('device-time').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    const display = document.getElementById('display');
+    const log = document.getElementById('log');
+    const input = document.getElementById('input');
+    let timer;
+
+    async function api(method, body = null) {
+        log.innerText = "";
+        const headers = {
+            "apikey": KEY,
+            "Authorization": `Bearer ${KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+        };
         
-        if (m !== lastMinute) {
-            document.getElementById('message').innerText = customMsg || baseWords[(h * 60 + m) % baseWords.length];
-            const dots = document.getElementById('dots');
-            dots.innerHTML = '';
-            for(let i=0; i<4; i++) {
-                let d = document.createElement('div');
-                d.className = 'dot' + (i <= Math.floor(h/6) ? ' active' : '');
-                dots.appendChild(d);
-            }
-            lastMinute = m;
+        let url = method === 'GET' ? `${BASE_URL}?select=content&order=created_at.desc&limit=1` : BASE_URL;
+
+        try {
+            const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            return data;
+        } catch (e) {
+            log.innerText = "ОШИБКА: " + e.message;
+            throw e;
         }
     }
 
-    function renderLanguages(filter = "") {
-        const list = document.getElementById('langList');
-        list.innerHTML = "";
-        languages.filter(l => l.toLowerCase().includes(filter.toLowerCase())).forEach(l => {
-            let div = document.createElement('div');
-            div.className = 'lang-item';
-            div.innerText = l;
-            div.onclick = () => {
-                currentLang = l;
-                localStorage.setItem('tot_lang', l);
-                document.getElementById('langOverlay').classList.remove('active');
-            };
-            list.appendChild(div);
-        });
+    async function load() {
+        display.style.opacity = "0.4";
+        try {
+            const data = await api('GET');
+            if (data && data.length > 0) {
+                display.innerText = data[0].content; // Добавил [0], так как возвращается массив
+            } else {
+                display.innerText = "ЭФИР ПУСТ";
+            }
+        } catch (e) {
+            display.innerText = "СЕТЬ OFF";
+        }
+        display.style.opacity = "1";
     }
 
-    document.getElementById('globeBtn').onclick = () => {
-        document.getElementById('langOverlay').classList.add('active');
-        renderLanguages();
-    };
-    document.getElementById('langSearch').oninput = (e) => renderLanguages(e.target.value);
-    document.getElementById('closeLang').onclick = () => document.getElementById('langOverlay').classList.remove('active');
+    async function send() {
+        const val = input.value.trim().toUpperCase();
+        if (!val) return;
+        toggle();
+        display.innerText = "СИГНАЛ...";
+        try {
+            await api('POST', { content: val });
+            input.value = "";
+            setTimeout(load, 500); 
+        } catch (e) {
+            display.innerText = "ОШИБКА";
+        }
+    }
 
-    const msgEl = document.getElementById('message');
-    const textOverlay = document.getElementById('textOverlay');
-    const editText = document.getElementById('edit-text');
+    function toggle() { document.getElementById('overlay').classList.toggle('active'); }
 
-    msgEl.onclick = () => {
-        textOverlay.classList.add('active');
-        editText.value = customMsg;
-        editText.focus();
-    };
+    // Управление для Android
+    display.ontouchstart = () => { timer = setTimeout(() => { timer = null; toggle(); }, 600); };
+    display.ontouchend = () => { if (timer) { clearTimeout(timer); load(); } };
 
-    document.getElementById('cancelBtn').onclick = () => textOverlay.classList.remove('active');
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('date').innerText = now.toLocaleDateString('ru-RU');
+        document.getElementById('time').innerText = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+    }
 
-    document.getElementById('sendBtn').onclick = () => {
-        customMsg = editText.value.trim();
-        localStorage.setItem('tot_msg', customMsg);
-        lastMinute = -1; 
-        updateApp();
-        textOverlay.classList.remove('active');
-    };
-
-    setInterval(updateApp, 1000);
-    updateApp();
+    setInterval(updateTime, 1000);
+    updateTime();
+    load();
 </script>
+
 </body>
 </html>
