@@ -37,6 +37,7 @@
 </div>
 
 <script>
+    // ИСПРАВЛЕННЫЙ URL ИЗ ТВОЕГО СКРИНШОТА
     const PROJECT_URL = "https://supabase.co"; 
     const KEY = "sb_publishable_DArGTwAvQs-vJlD9sxxv8A_ZBZ38TbH";
     const BASE_URL = `${PROJECT_URL}/rest/v1/messages`;
@@ -59,9 +60,11 @@
 
         try {
             const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            const data = await res.json();
-            return data;
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || "Ошибка");
+            }
+            return await res.json();
         } catch (e) {
             log.innerText = "ОШИБКА: " + e.message;
             throw e;
@@ -72,11 +75,7 @@
         display.style.opacity = "0.4";
         try {
             const data = await api('GET');
-            if (data && data.length > 0) {
-                display.innerText = data[0].content; // Добавил [0], так как возвращается массив
-            } else {
-                display.innerText = "ЭФИР ПУСТ";
-            }
+            display.innerText = (data && data.length > 0) ? data[0].content : "ЭФИР ПУСТ";
         } catch (e) {
             display.innerText = "СЕТЬ OFF";
         }
@@ -93,13 +92,12 @@
             input.value = "";
             setTimeout(load, 500); 
         } catch (e) {
-            display.innerText = "ОШИБКА";
+            display.innerText = "СБОЙ";
         }
     }
 
     function toggle() { document.getElementById('overlay').classList.toggle('active'); }
 
-    // Управление для Android
     display.ontouchstart = () => { timer = setTimeout(() => { timer = null; toggle(); }, 600); };
     display.ontouchend = () => { if (timer) { clearTimeout(timer); load(); } };
 
@@ -113,6 +111,5 @@
     updateTime();
     load();
 </script>
-
 </body>
 </html>
