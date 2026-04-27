@@ -3,85 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOTILER</title>
+    <title>TOTILER Pager Edition v2</title>
     <style>
         body { background: #f4f4f4; font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; user-select: none; -webkit-user-select: none; }
         
         .frame { 
-            background: radial-gradient(circle, #FAF6E1 0%, #F5F0D5 100%); 
+            background: radial-gradient(circle, #FAF6E1 0%, #F5F0D5 100%);
             border: 3px solid #E4D96F; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px 14px; border-radius: 26px; 
-            box-shadow: inset 0 0 15px rgba(228, 217, 111, 0.2), 0 8px 20px rgba(0,0,0,0.06); 
-            position: relative; overflow: hidden; 
+            padding: 15px 20px; /* Увеличил отступы, чтобы не нализало на рамку */
+            border-radius: 26px; 
+            box-shadow: inset 0 0 15px rgba(228, 217, 111, 0.2), 0 8px 20px rgba(0,0,0,0.06);
+            position: relative;
             width: 95%; max-width: 360px; box-sizing: border-box;
         }
 
-        .watermark { position: absolute; font-size: 8rem; font-weight: 900; color: #E4D96F; opacity: 0.12; z-index: 0; top: 50%; left: 50%; transform: translate(-50%, -50%) perspective(400px) rotateX(20deg) rotateY(-10deg); letter-spacing: 15px; pointer-events: none; white-space: nowrap; }
+        .globe-icon { 
+            position: absolute; top: 12px; left: 12px; 
+            font-size: 1.3rem; color: #87CEEB; z-index: 20; cursor: pointer; 
+        }
 
-        .time-row { display: flex; width: 100%; justify-content: space-between; align-items: center; z-index: 2; height: 2.8rem; }
-        
-        .current-date { color: rgba(100, 90, 80, 0.25); font-size: 2.5rem; font-weight: 900; letter-spacing: -3px; line-height: 1; }
-        .current-time { color: rgba(90, 85, 80, 0.5); font-size: 2.5rem; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+        /* ОКНО ВЫБОРА ЯЗЫКА (Стиль пейджера) */
+        .lang-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #FAF6E1; border-radius: 22px; z-index: 30;
+            display: none; flex-direction: column; padding: 15px; box-sizing: border-box;
+        }
+        .lang-overlay.active { display: flex; }
 
-        #message { font-size: 0.75rem; color: rgba(0, 0, 0, 0.6); font-weight: 600; width: 100%; text-align: justify; text-align-last: justify; text-transform: uppercase; letter-spacing: 3px; margin: 12px 0 16px 0; z-index: 2; opacity: 0.8; }
+        .lang-search {
+            width: 100%; border: 1px solid #E4D96F; border-radius: 8px;
+            padding: 8px; font-size: 0.9rem; outline: none; margin-bottom: 10px;
+            background: #fff; box-sizing: border-box;
+        }
 
-        .dots { display: flex; justify-content: space-between; width: 100%; gap: 6px; z-index: 2; }
-        .dot { flex-grow: 1; height: 4px; background: rgba(0, 0, 0, 0.04); border-radius: 2px; }
-        .dot.active { background: #E4D96F; opacity: 0.7; }
+        .lang-list { 
+            flex-grow: 1; overflow-y: auto; width: 100%; 
+            border: 1px solid rgba(228, 217, 111, 0.3); border-radius: 8px;
+        }
+        .lang-item { 
+            padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; 
+            text-align: left; cursor: pointer; color: #555;
+        }
+        .lang-item:hover { background: #fff; }
+
+        .watermark { position: absolute; font-size: 8rem; font-weight: 900; color: #E4D96F; opacity: 0.15; z-index: 0; top: 50%; left: 50%; transform: translate(-50%, -50%) perspective(400px) rotateX(20deg) rotateY(-10deg); letter-spacing: 15px; pointer-events: none; white-space: nowrap; }
+
+        .time-row { 
+            display: flex; width: 100%; justify-content: space-between; 
+            align-items: center; z-index: 2; height: 3rem;
+            margin-top: 5px; /* Сдвинул от верхнего края */
+        }
+        .current-date { color: rgba(102, 102, 102, 0.3); font-size: 2.3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+        .current-time { color: #666; font-size: 2.3rem; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+
+        #message { font-size: 0.75rem; color: #000; font-weight: 600; width: 100%; text-align: justify; text-align-last: justify; text-transform: uppercase; letter-spacing: 3px; margin: 15px 0; z-index: 2; opacity: 0.8; cursor: pointer; }
+
+        .dots { display: flex; justify-content: space-between; width: 100%; gap: 6px; z-index: 2; margin-bottom: 5px; }
+        .dot { flex-grow: 1; height: 4px; background: rgba(0, 0, 0, 0.05); border-radius: 2px; }
+        .dot.active { background: #E4D96F; }
+
+        /* ОКНО СООБЩЕНИЯ */
+        .pager-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #FAF6E1; z-index: 40; display: none; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px;
+            box-sizing: border-box; border-radius: 22px;
+        }
+        .pager-overlay.active { display: flex; }
+
+        #edit-text { 
+            width: 100%; height: 140px; border: 2px solid #E4D96F; 
+            border-radius: 12px; padding: 12px; font-size: 16px; 
+            outline: none; resize: none; margin-bottom: 15px; background: #fff;
+        }
+        .btn { padding: 10px 20px; background: #E4D96F; border-radius: 10px; font-weight: bold; color: #fff; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
     <div class="frame">
+        <div class="globe-icon" id="globeBtn">🌐</div>
         <div class="watermark">TOT</div>
         
         <div class="time-row">
-            <div class="current-date" id="d-date">00.00.00</div>
-            <div class="current-time" id="d-time">00:00</div>
+            <div class="current-date" id="device-date">00.00.00</div>
+            <div class="current-time" id="device-time">00:00</div>
         </div>
 
-        <div id="message">СИНХРОНИЗАЦИЯ</div>
+        <div id="message">НАЖМИТЕ ДЛЯ СВЯЗИ...</div>
+        <div class="dots" id="dots"></div>
 
-        <div class="dots" id="d-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <!-- Окно выбора языка (Пейджер-стиль) -->
+        <div class="lang-overlay" id="langOverlay">
+            <div style="font-size:0.6rem; color:#B5A93F; margin-bottom:5px; font-weight:bold;">SELECT LANGUAGE</div>
+            <input type="text" class="lang-search" id="langSearch" placeholder="Поиск языка...">
+            <div class="lang-list" id="langList"></div>
+            <div class="btn" id="closeLang" style="margin-top:10px; width:100%; text-align:center; box-sizing:border-box;">ЗАКРЫТЬ</div>
+        </div>
+
+        <!-- Окно сообщения -->
+        <div class="pager-overlay" id="textOverlay">
+            <div style="font-size: 0.6rem; color: #B5A93F; margin-bottom: 10px; font-weight: bold;">PAGER INPUT</div>
+            <textarea id="edit-text" maxlength="300" placeholder="ВВЕДИТЕ ТЕКСТ..."></textarea>
+            <div style="display:flex; gap:10px;">
+                <div class="btn" id="sendBtn">ОТПРАВИТЬ</div>
+                <div class="btn" id="cancelBtn" style="background:#ccc">ОТМЕНА</div>
+            </div>
         </div>
     </div>
 
 <script>
-    const dictionary = ["СВЯЗЬ", "ПОТОК", "МИР", "ВРЕМЯ", "ЖДИ", "ИДУ", "СВОБОДА", "ПУЛЬС"];
+    const languages = ["Русский", "English", "中文", "Español", "العربية", "हिन्दी", "Français", "Deutsch", "日本語", "Türkçe"];
+    const baseWords = ["МИР", "СВЯЗЬ", "ПОТОК", "ВРЕМЯ", "ЖДИ", "ИДУ", "СВОБОДА", "ПУЛЬС", "ГОРОД", "ВАЖНО"];
+    
+    let currentLang = localStorage.getItem('tot_lang') || "Русский";
+    let customMsg = localStorage.getItem('tot_msg') || "";
     let lastMinute = -1;
 
-    function update() {
+    function updateApp() {
         const now = new Date();
-        const h = now.getHours();
-        const m = now.getMinutes();
-
-        // 1. Обновление Даты и Времени (Гарантированно работает)
-        const dateStr = now.getDate().toString().padStart(2, '0') + '.' + (now.getMonth() + 1).toString().padStart(2, '0') + '.' + now.getFullYear().toString().slice(-2);
-        const timeStr = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+        const h = now.getHours(), m = now.getMinutes();
+        document.getElementById('device-date').innerText = `${now.getDate().toString().padStart(2,'0')}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getFullYear().toString().slice(-2)}`;
+        document.getElementById('device-time').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
         
-        document.getElementById('d-date').innerText = dateStr;
-        document.getElementById('d-time').innerText = timeStr;
-
-        // 2. Смена слова раз в минуту
         if (m !== lastMinute) {
-            const cycleMin = Math.floor((Date.now() / 60000) % 360);
-            document.getElementById('message').innerText = dictionary[cycleMin % dictionary.length];
-            lastMinute = m;
-
-            // 3. Обновление точек цикла (один раз в минуту)
-            const progress = Math.floor(((h * 60 + m) % 360) / 90);
-            const dots = document.getElementById('d-dots').children;
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].className = i <= progress ? 'dot active' : 'dot';
+            document.getElementById('message').innerText = customMsg || baseWords[(h * 60 + m) % baseWords.length];
+            const dots = document.getElementById('dots');
+            dots.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                let d = document.createElement('div');
+                d.className = 'dot' + (i <= Math.floor(h/6) ? ' active' : '');
+                dots.appendChild(d);
             }
+            lastMinute = m;
         }
     }
 
-    // Запуск без задержек
-    setInterval(update, 1000);
-    update();
+    // Рендер языков с поиском
+    function renderLanguages(filter = "") {
+        const list = document.getElementById('langList');
+        list.innerHTML = "";
+        languages.filter(l => l.toLowerCase().includes(filter.toLowerCase())).forEach(l => {
+            let div = document.createElement('div');
+            div.className = 'lang-item';
+            div.innerText = l;
+            div.onclick = () => {
+                currentLang = l;
+                localStorage.setItem('tot_lang', l);
+                document.getElementById('langOverlay').classList.remove('active');
+            };
+            list.appendChild(div);
+        });
+    }
+
+    document.getElementById('globeBtn').onclick = () => {
+        document.getElementById('langOverlay').classList.add('active');
+        renderLanguages();
+    };
+    document.getElementById('langSearch').oninput = (e) => renderLanguages(e.target.value);
+    document.getElementById('closeLang').onclick = () => document.getElementById('langOverlay').classList.remove('active');
+
+    document.getElementById('message').onclick = () => {
+        document.getElementById('textOverlay').classList.add('active');
+        document.getElementById('edit-text').value = customMsg;
+    };
+    document.getElementById('cancelBtn').onclick = () => document.getElementById('textOverlay').classList.remove('active');
+    document.getElementById('sendBtn').onclick = () => {
+        customMsg = document.getElementById('edit-text').value.trim().toUpperCase();
+        localStorage.setItem('tot_msg', customMsg);
+        document.getElementById('textOverlay').classList.remove('active');
+        lastMinute = -1; updateApp();
+    };
+
+    setInterval(updateApp, 1000);
+    updateApp();
 </script>
 </body>
 </html>
