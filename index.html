@@ -37,7 +37,7 @@
 </div>
 
 <script>
-    // ИСПРАВЛЕННЫЙ URL ИЗ ТВОЕГО СКРИНШОТА
+    // ПРАВИЛЬНЫЙ АДРЕС ИЗ СКРИНШОТА
     const PROJECT_URL = "https://supabase.co"; 
     const KEY = "sb_publishable_DArGTwAvQs-vJlD9sxxv8A_ZBZ38TbH";
     const BASE_URL = `${PROJECT_URL}/rest/v1/messages`;
@@ -75,7 +75,12 @@
         display.style.opacity = "0.4";
         try {
             const data = await api('GET');
-            display.innerText = (data && data.length > 0) ? data[0].content : "ЭФИР ПУСТ";
+            if (data && data.length > 0) {
+                // Берем content из ПЕРВОГО элемента массива
+                display.innerText = data[0].content;
+            } else {
+                display.innerText = "ЭФИР ПУСТ";
+            }
         } catch (e) {
             display.innerText = "СЕТЬ OFF";
         }
@@ -98,8 +103,13 @@
 
     function toggle() { document.getElementById('overlay').classList.toggle('active'); }
 
-    display.ontouchstart = () => { timer = setTimeout(() => { timer = null; toggle(); }, 600); };
-    display.ontouchend = () => { if (timer) { clearTimeout(timer); load(); } };
+    // Управление для Android
+    display.ontouchstart = (e) => {
+        timer = setTimeout(() => { timer = null; toggle(); }, 600);
+    };
+    display.ontouchend = (e) => {
+        if (timer) { clearTimeout(timer); load(); }
+    };
 
     function updateTime() {
         const now = new Date();
