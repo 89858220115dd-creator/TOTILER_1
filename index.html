@@ -36,8 +36,8 @@
 </div>
 
 <script>
-    // ПРОВЕРЕННЫЙ АДРЕС
-    const PROJECT_URL = "https://supabase.co"; 
+    // ВПИШИ СВОЙ ID ВМЕСТО ТВОЙ_ID_ПРОЕКТА
+    const PROJECT_URL = "https://ТВОЙ_ID_ПРОЕКТА.supabase.co"; 
     const KEY = "sb_publishable_DArGTwAvQs-vJlD9sxxv8A_ZBZ38TbH";
     const BASE_URL = `${PROJECT_URL}/rest/v1/messages`;
 
@@ -61,11 +61,11 @@
             const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.message || "ОШИБКА HTTP");
+                throw new Error(err.message || "ОШИБКА");
             }
             return await res.json();
         } catch (e) {
-            log.innerText = "ДЕТАЛИ: " + e.message;
+            log.innerText = "Error: " + e.message;
             throw e;
         }
     }
@@ -75,7 +75,8 @@
         try {
             const data = await api('GET');
             if (data && data.length > 0) {
-                display.innerText = data[0].content; // Исправлено получение текста
+                // ИСПРАВЛЕНО: Обращаемся к [0], так как API возвращает массив
+                display.innerText = data[0].content; 
             } else {
                 display.innerText = "ЭФИР ПУСТ";
             }
@@ -93,16 +94,22 @@
         try {
             await api('POST', { content: val });
             input.value = "";
-            setTimeout(load, 800); 
+            setTimeout(load, 1000); 
         } catch (e) {
             display.innerText = "СБОЙ";
         }
     }
 
-    function toggle() { document.getElementById('overlay').classList.toggle('active'); }
+    function toggle() { 
+        document.getElementById('overlay').classList.toggle('active'); 
+        if(document.getElementById('overlay').classList.contains('active')) input.focus();
+    }
 
-    display.ontouchstart = () => { timer = setTimeout(() => { timer = null; toggle(); }, 600); };
-    display.ontouchend = () => { if (timer) { clearTimeout(timer); load(); } };
+    const start = (e) => { timer = setTimeout(() => { timer = null; toggle(); }, 600); };
+    const end = (e) => { if (timer) { clearTimeout(timer); load(); } };
+
+    display.onmousedown = display.ontouchstart = start;
+    display.onmouseup = display.ontouchend = end;
 
     function updateTime() {
         const now = new Date();
