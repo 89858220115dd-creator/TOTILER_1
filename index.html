@@ -74,6 +74,7 @@
         try {
             const data = await api('GET');
             if (data && data.length > 0) {
+                // ИСПРАВЛЕНО: Добавлен индекс [0]
                 display.innerText = data[0].content; 
             } else {
                 display.innerText = "ЭФИР ПУСТ";
