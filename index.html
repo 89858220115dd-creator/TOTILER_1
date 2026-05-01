@@ -36,8 +36,7 @@
 </div>
 
 <script>
-    // ВПИШИ СВОЙ ID ВМЕСТО ТВОЙ_ID_ПРОЕКТА
-    const PROJECT_URL = "https://ТВОЙ_ID_ПРОЕКТА.supabase.co"; 
+    const PROJECT_URL = "https://supabase.co"; 
     const KEY = "sb_publishable_DArGTwAvQs-vJlD9sxxv8A_ZBZ38TbH";
     const BASE_URL = `${PROJECT_URL}/rest/v1/messages`;
 
@@ -75,7 +74,6 @@
         try {
             const data = await api('GET');
             if (data && data.length > 0) {
-                // ИСПРАВЛЕНО: Обращаемся к [0], так как API возвращает массив
                 display.innerText = data[0].content; 
             } else {
                 display.innerText = "ЭФИР ПУСТ";
